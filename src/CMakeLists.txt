@@ -4,21 +4,22 @@ include(AddSAMPPlugin)
 set(PLUGIN_SOURCES ${SAMPSDK_DIR}/amxplugin.cpp)
 
 add_subdirectory(manipulation)
-add_subdirectory(natives)
+add_subdirectory(pawnapi)
+add_subdirectory(jsapi)
 add_subdirectory(utility)
 
 list(APPEND PLUGIN_SOURCES
-	cell.cpp
-	chunk-streamer.cpp
-	core.cpp
-	data.cpp
-	grid.cpp
-	identifier.cpp
-	item.cpp
-	main.cpp
-	player.cpp
-	streamer.cpp
-	omp-nethack.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/cell.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/chunk-streamer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/core.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/data.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/grid.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/identifier.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/item.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/player.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/streamer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/omp-nethack.cpp
 )
 
 if(WIN32)
@@ -28,6 +29,8 @@ if(WIN32)
 endif()
 
 add_samp_plugin(${PROJECT_NAME} ${PLUGIN_SOURCES})
+
+GroupSourcesByFolder(${PROJECT_NAME})
 
 if(WIN32)
 	add_definitions(-DNOMINMAX)
@@ -45,5 +48,9 @@ add_definitions(
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 target_link_libraries(${PROJECT_NAME} OMP-SDK omp-gdk OMP-Network)
+
+if(TARGET_ARCH STREQUAL "x64")
+	target_link_libraries(${PROJECT_NAME} omp-node-sdk)
+endif()
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)

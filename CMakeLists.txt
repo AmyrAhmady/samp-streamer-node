@@ -3,6 +3,7 @@ project(streamer)
 
 set(PLUGIN_VERSION "2.9.6")
 set(CMAKE_CXX_STANDARD 17)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if (MSVC)
     add_definitions("/MP")
@@ -11,6 +12,31 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/lib/cmake-modules")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/lib/eigen/cmake")
+
+function(GroupSourcesByFolder target)
+	set(SOURCE_GROUP_DELIMITER "/")
+	set(last_dir "")
+	set(files "")
+
+	get_target_property(sources ${target} SOURCES)
+
+	foreach(file ${sources})
+		file(RELATIVE_PATH relative_file "${CMAKE_CURRENT_SOURCE_DIR}" ${file})
+		get_filename_component(dir "${relative_file}" PATH)
+		if(NOT "${dir}" STREQUAL "${last_dir}")
+			if(files)
+				source_group("${last_dir}" FILES ${files})
+			endif()
+			set(files "")
+		endif()
+		set(files ${files} ${file})
+		set(last_dir "${dir}")
+	endforeach()
+
+	if(files)
+		source_group("${last_dir}" FILES ${files})
+	endif()
+endfunction()
 
 set(SAMP_SDK_ROOT "${PROJECT_SOURCE_DIR}/lib/samp-plugin-sdk")
 find_package(SAMPSDK REQUIRED)
@@ -36,10 +62,16 @@ include(CheckTypeSize)
 check_type_size("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
 
 if(NOT WIN32)
-	if(NOT TARGET_ARCH OR TARGET_ARCH EQUAL x86)
+	if(NOT TARGET_ARCH OR TARGET_ARCH STREQUAL "x86")
 		set(CMAKE_C_FLAGS "-m32 ${CMAKE_C_FLAGS}")
 		set(CMAKE_CXX_FLAGS "-m32 ${CMAKE_CXX_FLAGS}")
 	endif()
+endif()
+
+message("YO? ${TARGET_ARCH}")
+if(TARGET_ARCH STREQUAL "x64")
+	
+	add_subdirectory(lib/omp-node)
 endif()
 
 add_subdirectory(lib/omp-sdk)
