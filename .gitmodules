@@ -19,3 +19,6 @@
 [submodule "lib/omp-network"]
 	path = lib/omp-network
 	url = https://github.com/openmultiplayer/open.mp-network
+[submodule "lib/omp-node"]
+	path = lib/omp-node
+	url = https://github.com/AmyrAhmady/omp-node
