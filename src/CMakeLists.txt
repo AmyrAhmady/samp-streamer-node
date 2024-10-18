@@ -5,8 +5,11 @@ set(PLUGIN_SOURCES ${SAMPSDK_DIR}/amxplugin.cpp)
 
 add_subdirectory(manipulation)
 add_subdirectory(pawnapi)
-add_subdirectory(jsapi)
 add_subdirectory(utility)
+
+if(TARGET_ARCH STREQUAL "x64")
+	add_subdirectory(jsapi)
+endif()
 
 list(APPEND PLUGIN_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/cell.cpp
