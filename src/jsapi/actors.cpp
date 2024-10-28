@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Incognito
+ * Copyright (C) 2024 AmyrAhmady (iAmir), Incognito
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,52 +16,66 @@
 
 #include "../main.h"
 
-#include "../natives.h"
+#include "omp-node.hpp"
 #include "../core.h"
 #include "../utility.h"
 
-cell AMX_NATIVE_CALL Natives::CreateDynamicActor(AMX *amx, cell *params)
+OMPNODE_API(StreamerActor, Create, int modelid, float x, float y, float z, float r, int invulnerable, float health, int worldid, int interiorid, int playerid, float streamdistance, int areaid, int priority)
 {
-	CHECK_PARAMS(13);
 	if (core->getData()->getGlobalMaxItems(STREAMER_TYPE_ACTOR) == core->getData()->actors.size())
 	{
 		return INVALID_STREAMER_ID;
 	}
 	int actorId = Item::Actor::identifier.get();
 	Item::SharedActor actor(new Item::Actor);
-	actor->amx = amx;
+	actor->amx = nullptr; // TODO must be checked if it's used anywhere
 	actor->actorId = actorId;
 	actor->inverseAreaChecking = false;
 	actor->originalComparableStreamDistance = -1.0f;
 	actor->positionOffset = Eigen::Vector3f::Zero();
-	actor->modelId = static_cast<int>(params[1]);
-	actor->position = Eigen::Vector3f(amx_ctof(params[2]), amx_ctof(params[3]), amx_ctof(params[4]));
-	actor->rotation = amx_ctof(params[5]);
-	actor->invulnerable = static_cast<int>(params[6]) != 0;
-	actor->health = amx_ctof(params[7]);
-	Utility::addToContainer(actor->worlds, static_cast<int>(params[8]));
-	Utility::addToContainer(actor->interiors, static_cast<int>(params[9]));
-	Utility::addToContainer(actor->players, static_cast<int>(params[10]));
-	actor->comparableStreamDistance = amx_ctof(params[11]) < STREAMER_STATIC_DISTANCE_CUTOFF ? amx_ctof(params[11]) : amx_ctof(params[11]) * amx_ctof(params[11]);
-	actor->streamDistance = amx_ctof(params[11]);
-	Utility::addToContainer(actor->areas, static_cast<int>(params[12]));
-	actor->priority = static_cast<int>(params[13]);
+	actor->modelId = static_cast<int>(modelid);
+	actor->position = Eigen::Vector3f(x, y, z);
+	actor->rotation = r;
+	actor->invulnerable = invulnerable != 0;
+	actor->health = health;
+	Utility::addToContainer(actor->worlds, worldid);
+	Utility::addToContainer(actor->interiors, interiorid);
+	Utility::addToContainer(actor->players, playerid);
+	actor->comparableStreamDistance = streamdistance < STREAMER_STATIC_DISTANCE_CUTOFF ? streamdistance : streamdistance * streamdistance;
+	actor->streamDistance = streamdistance;
+	Utility::addToContainer(actor->areas, areaid);
+	actor->priority = priority;
 	core->getGrid()->addActor(actor);
 	core->getData()->actors.insert(std::make_pair(actorId, actor));
-	return static_cast<cell>(actorId);
+
+	int ret = actorId;
+	API_RETURN(int ret);
 }
 
-cell AMX_NATIVE_CALL Natives::DestroyDynamicActor(AMX *amx, cell *params)
+OMPNODE_API(StreamerActor, Destroy, int actorid)
 {
-	CHECK_PARAMS(1);
-	std::unordered_map<int, Item::SharedActor>::iterator a = core->getData()->actors.find(static_cast<int>(params[1]));
+	bool ret = false;
+	std::unordered_map<int, Item::SharedActor>::iterator a = core->getData()->actors.find(actorid);
 	if (a != core->getData()->actors.end())
 	{
 		Utility::destroyActor(a);
-		return 1;
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret);
 }
+
+OMPNODE_API(StreamerActor, IsValid, int actorid)
+{
+	bool ret = false;
+	std::unordered_map<int, Item::SharedActor>::iterator a = core->getData()->actors.find(actorid);
+	if (a != core->getData()->actors.end())
+	{
+		ret = true;
+	}
+	API_RETURN(bool ret);
+}
+
+/*
 
 cell AMX_NATIVE_CALL Natives::IsValidDynamicActor(AMX *amx, cell *params)
 {
@@ -399,3 +413,5 @@ cell AMX_NATIVE_CALL Natives::GetPlayerCameraTargetDynActor(AMX *amx, cell *para
 	}
 	return INVALID_STREAMER_ID;
 }
+
+*/
