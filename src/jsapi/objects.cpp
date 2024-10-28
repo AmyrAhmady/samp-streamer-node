@@ -68,44 +68,45 @@ OMPNODE_API(StreamerObject, Destroy, int objectid)
 	API_RETURN(bool ret);
 }
 
-/*
-cell AMX_NATIVE_CALL Natives::IsValidDynamicObject(AMX *amx, cell *params)
+OMPNODE_API(StreamerObject, IsValid, int objectid)
 {
-	CHECK_PARAMS(1);
-	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(static_cast<int>(params[1]));
-	if (o != core->getData()->objects.end())
-	{
-		return 1;
-	}
-	return 0;
+	bool ret = false;
+	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(objectid);
+	ret = o != core->getData()->objects.end();
+	API_RETURN(bool ret);
 }
 
-cell AMX_NATIVE_CALL Natives::GetDynamicObjectPos(AMX *amx, cell *params)
+OMPNODE_API(StreamerObject, GetPos, int objectid)
 {
-	CHECK_PARAMS(4);
-	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(static_cast<int>(params[1]));
+	bool ret = false;
+	float x = NAN;
+	float y = NAN;
+	float z = NAN;
+
+	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(objectid);
 	if (o != core->getData()->objects.end())
 	{
 		if (o->second->move)
 		{
 			core->getStreamer()->processActiveItems();
 		}
-		Utility::storeFloatInNative(amx, params[2], o->second->position[0]);
-		Utility::storeFloatInNative(amx, params[3], o->second->position[1]);
-		Utility::storeFloatInNative(amx, params[4], o->second->position[2]);
-		return 1;
+
+		x = o->second->position[0];
+		y = o->second->position[1];
+		z = o->second->position[2];
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret, float x, float y, float z);
 }
 
-cell AMX_NATIVE_CALL Natives::SetDynamicObjectPos(AMX *amx, cell *params)
+OMPNODE_API(StreamerObject, SetPos, int objectid, float x, float y, float z)
 {
-	CHECK_PARAMS(4);
-	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(static_cast<int>(params[1]));
+	bool ret = false;
+	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(objectid);
 	if (o != core->getData()->objects.end())
 	{
 		Eigen::Vector3f position = o->second->position;
-		o->second->position = Eigen::Vector3f(amx_ctof(params[2]), amx_ctof(params[3]), amx_ctof(params[4]));
+		o->second->position = Eigen::Vector3f(x, y, z);
 		for (std::unordered_map<int, Player>::iterator p = core->getData()->players.begin(); p != core->getData()->players.end(); ++p)
 		{
 			std::unordered_map<int, int>::iterator i = p->second.internalObjects.find(o->first);
@@ -133,36 +134,41 @@ cell AMX_NATIVE_CALL Natives::SetDynamicObjectPos(AMX *amx, cell *params)
 			}
 			o->second->move->time = std::chrono::steady_clock::now();
 		}
-		return 1;
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret);
 }
 
-cell AMX_NATIVE_CALL Natives::GetDynamicObjectRot(AMX *amx, cell *params)
+OMPNODE_API(StreamerObject, GetRot, int objectid)
 {
-	CHECK_PARAMS(4);
-	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(static_cast<int>(params[1]));
+	bool ret = false;
+	float x = NAN;
+	float y = NAN;
+	float z = NAN;
+
+	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(objectid);
 	if (o != core->getData()->objects.end())
 	{
 		if (o->second->move)
 		{
 			core->getStreamer()->processActiveItems();
 		}
-		Utility::storeFloatInNative(amx, params[2], o->second->rotation[0]);
-		Utility::storeFloatInNative(amx, params[3], o->second->rotation[1]);
-		Utility::storeFloatInNative(amx, params[4], o->second->rotation[2]);
-		return 1;
+
+		x = o->second->rotation[0];
+		y = o->second->rotation[1];
+		z = o->second->rotation[2];
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret, float x, float y, float z);
 }
 
-cell AMX_NATIVE_CALL Natives::SetDynamicObjectRot(AMX *amx, cell *params)
+OMPNODE_API(StreamerObject, SetRot, int objectid, float x, float y, float z)
 {
-	CHECK_PARAMS(4);
-	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(static_cast<int>(params[1]));
+	bool ret = false;
+	std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(objectid);
 	if (o != core->getData()->objects.end())
 	{
-		o->second->rotation = Eigen::Vector3f(amx_ctof(params[2]), amx_ctof(params[3]), amx_ctof(params[4]));
+		o->second->rotation = Eigen::Vector3f(x, y, z);
 		for (std::unordered_map<int, Player>::iterator p = core->getData()->players.begin(); p != core->getData()->players.end(); ++p)
 		{
 			std::unordered_map<int, int>::iterator i = p->second.internalObjects.find(o->first);
@@ -179,10 +185,12 @@ cell AMX_NATIVE_CALL Natives::SetDynamicObjectRot(AMX *amx, cell *params)
 				std::get<2>(o->second->move->rotation) = (std::get<0>(o->second->move->rotation) - o->second->rotation) / static_cast<float>(o->second->move->duration);
 			}
 		}
-		return 1;
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret);
 }
+
+/*
 
 cell AMX_NATIVE_CALL Natives::GetDynamicObjectNoCameraCol(AMX *amx, cell *params)
 {
