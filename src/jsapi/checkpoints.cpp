@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Incognito
+ * Copyright (C) 2024 AmyrAhmady (iAmir), Incognito
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,61 +16,65 @@
 
 #include "../main.h"
 
-#include "../natives.h"
+#include "omp-node.hpp"
 #include "../core.h"
 #include "../utility.h"
 
-cell AMX_NATIVE_CALL Natives::CreateDynamicCP(AMX *amx, cell *params)
+
+OMPNODE_API(StreamerCheckpoint, Create, float x, float y, float z, float size, int worldid, int interiorid, int playerid, float streamdistance, int areaid, int priority)
 {
-	CHECK_PARAMS(10);
 	if (core->getData()->getGlobalMaxItems(STREAMER_TYPE_CP) == core->getData()->checkpoints.size())
 	{
 		return INVALID_STREAMER_ID;
 	}
 	int checkpointId = Item::Checkpoint::identifier.get();
 	Item::SharedCheckpoint checkpoint(new Item::Checkpoint);
-	checkpoint->amx = amx;
+	checkpoint->amx = nullptr; // TODO must be checked if it's used anywhere
 	checkpoint->checkpointId = checkpointId;
 	checkpoint->inverseAreaChecking = false;
 	checkpoint->originalComparableStreamDistance = -1.0f;
 	checkpoint->positionOffset = Eigen::Vector3f::Zero();
 	checkpoint->streamCallbacks = false;
-	checkpoint->position = Eigen::Vector3f(amx_ctof(params[1]), amx_ctof(params[2]), amx_ctof(params[3]));
-	checkpoint->size = amx_ctof(params[4]);
-	Utility::addToContainer(checkpoint->worlds, static_cast<int>(params[5]));
-	Utility::addToContainer(checkpoint->interiors, static_cast<int>(params[6]));
-	Utility::addToContainer(checkpoint->players, static_cast<int>(params[7]));
-	checkpoint->comparableStreamDistance = amx_ctof(params[8]) < STREAMER_STATIC_DISTANCE_CUTOFF ? amx_ctof(params[8]) : amx_ctof(params[8]) * amx_ctof(params[8]);
-	checkpoint->streamDistance = amx_ctof(params[8]);
-	Utility::addToContainer(checkpoint->areas, static_cast<int>(params[9]));
-	checkpoint->priority = static_cast<int>(params[10]);
+	checkpoint->position = Eigen::Vector3f(x, y, z);
+	checkpoint->size = size;
+	Utility::addToContainer(checkpoint->worlds, worldid);
+	Utility::addToContainer(checkpoint->interiors, interiorid);
+	Utility::addToContainer(checkpoint->players, playerid);
+	checkpoint->comparableStreamDistance = streamdistance < STREAMER_STATIC_DISTANCE_CUTOFF ? streamdistance : streamdistance * streamdistance;
+	checkpoint->streamDistance = streamdistance;
+	Utility::addToContainer(checkpoint->areas, areaid);
+	checkpoint->priority = priority;
 	core->getGrid()->addCheckpoint(checkpoint);
 	core->getData()->checkpoints.insert(std::make_pair(checkpointId, checkpoint));
-	return static_cast<cell>(checkpointId);
+
+	int ret = checkpointId;
+	API_RETURN(int ret);
 }
 
-cell AMX_NATIVE_CALL Natives::DestroyDynamicCP(AMX *amx, cell *params)
+OMPNODE_API(StreamerCheckpoint, Destroy, int checkpointid)
 {
-	CHECK_PARAMS(1);
-	std::unordered_map<int, Item::SharedCheckpoint>::iterator c = core->getData()->checkpoints.find(static_cast<int>(params[1]));
+	bool ret = false;
+	std::unordered_map<int, Item::SharedCheckpoint>::iterator c = core->getData()->checkpoints.find(checkpointid);
 	if (c != core->getData()->checkpoints.end())
 	{
 		Utility::destroyCheckpoint(c);
-		return 1;
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret);
 }
 
-cell AMX_NATIVE_CALL Natives::IsValidDynamicCP(AMX *amx, cell *params)
+OMPNODE_API(StreamerCheckpoint, IsValid, int checkpointid)
 {
-	CHECK_PARAMS(1);
-	std::unordered_map<int, Item::SharedCheckpoint>::iterator c = core->getData()->checkpoints.find(static_cast<int>(params[1]));
+	bool ret = false;
+	std::unordered_map<int, Item::SharedCheckpoint>::iterator c = core->getData()->checkpoints.find(checkpointid);
 	if (c != core->getData()->checkpoints.end())
 	{
-		return 1;
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret);
 }
+
+/*
 
 cell AMX_NATIVE_CALL Natives::IsPlayerInDynamicCP(AMX *amx, cell *params)
 {
@@ -96,3 +100,5 @@ cell AMX_NATIVE_CALL Natives::GetPlayerVisibleDynamicCP(AMX *amx, cell *params)
 	}
 	return 0;
 }
+
+*/
