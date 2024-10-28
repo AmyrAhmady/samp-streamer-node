@@ -20,6 +20,7 @@
 #include "../core.h"
 #include "../utility.h"
 
+/*
 cell AMX_NATIVE_CALL Natives::CreateDynamicRaceCP(AMX *amx, cell *params)
 {
 	CHECK_PARAMS(14);
@@ -98,3 +99,4 @@ cell AMX_NATIVE_CALL Natives::GetPlayerVisibleDynamicRaceCP(AMX *amx, cell *para
 	}
 	return 0;
 }
+*/

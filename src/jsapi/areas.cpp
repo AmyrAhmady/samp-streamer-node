@@ -20,6 +20,7 @@
 #include "../core.h"
 #include "../utility.h"
 
+/*
 cell AMX_NATIVE_CALL Natives::CreateDynamicCircle(AMX *amx, cell *params)
 {
 	CHECK_PARAMS(7);
@@ -767,3 +768,4 @@ cell AMX_NATIVE_CALL Natives::IsToggleDynAreaSpectateMode(AMX *amx, cell *params
 	}
 	return 0;
 }
+*/

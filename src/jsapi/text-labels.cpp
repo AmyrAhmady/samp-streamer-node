@@ -20,6 +20,7 @@
 #include "../core.h"
 #include "../utility.h"
 
+/*
 cell AMX_NATIVE_CALL Natives::CreateDynamic3DTextLabel(AMX *amx, cell *params)
 {
 	CHECK_PARAMS(15);
@@ -120,3 +121,4 @@ cell AMX_NATIVE_CALL Natives::UpdateDynamic3DTextLabelText(AMX *amx, cell *param
 	}
 	return 0;
 }
+*/
