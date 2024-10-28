@@ -35,7 +35,7 @@ jobs:
       uses: lukka/get-cmake@v3.19.0
 
     - name: Generate build files
-      run: mkdir build && cd build && cmake .. -G "Visual Studio 16 2019" -A Win32
+      run: mkdir build && cd build && cmake .. -DTARGET_ARCH=x64 -G "Visual Studio 16 2019" -A Win32
 
     - name: Build
       run: |
@@ -74,7 +74,7 @@ jobs:
       uses: lukka/get-cmake@v3.19.0
 
     - name: Generate build files
-      run: mkdir build && cd build && cmake .. -G "Visual Studio 16 2019" -A Win32
+      run: mkdir build && cd build && cmake .. -DTARGET_ARCH=x64 -G "Visual Studio 16 2019" -A Win32
 
     - name: Build
       run: |
