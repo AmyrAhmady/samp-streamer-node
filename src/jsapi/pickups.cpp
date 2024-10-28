@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Incognito
+ * Copyright (C) 2024 AmyrAhmady (iAmir), Incognito
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,59 +16,60 @@
 
 #include "../main.h"
 
-#include "../natives.h"
+#include "omp-node.hpp"
 #include "../core.h"
 #include "../utility.h"
 
-cell AMX_NATIVE_CALL Natives::CreateDynamicPickup(AMX *amx, cell *params)
+OMPNODE_API(StreamerPickup, Create, int modelid, int type, float x, float y, float z, int worldid, int interiorid, int playerid, float streamdistance, int areaid, int priority)
 {
-	CHECK_PARAMS(11);
 	if (core->getData()->getGlobalMaxItems(STREAMER_TYPE_PICKUP) == core->getData()->pickups.size())
 	{
 		return INVALID_STREAMER_ID;
 	}
 	int pickupId = Item::Pickup::identifier.get();
 	Item::SharedPickup pickup(new Item::Pickup);
-	pickup->amx = amx;
+	pickup->amx = nullptr; // TODO must be checked if it's used anywhere
 	pickup->pickupId = pickupId;
 	pickup->inverseAreaChecking = false;
 	pickup->originalComparableStreamDistance = -1.0f;
 	pickup->positionOffset = Eigen::Vector3f::Zero();
 	pickup->streamCallbacks = false;
-	pickup->modelId = static_cast<int>(params[1]);
-	pickup->type = static_cast<int>(params[2]);
-	pickup->position = Eigen::Vector3f(amx_ctof(params[3]), amx_ctof(params[4]), amx_ctof(params[5]));
-	Utility::addToContainer(pickup->worlds, static_cast<int>(params[6]));
-	Utility::addToContainer(pickup->interiors, static_cast<int>(params[7]));
-	Utility::addToContainer(pickup->players, static_cast<int>(params[8]));
-	pickup->comparableStreamDistance = amx_ctof(params[9]) < STREAMER_STATIC_DISTANCE_CUTOFF ? amx_ctof(params[9]) : amx_ctof(params[9]) * amx_ctof(params[9]);
-	pickup->streamDistance = amx_ctof(params[9]);
-	Utility::addToContainer(pickup->areas, static_cast<int>(params[10]));
-	pickup->priority = static_cast<int>(params[11]);
+	pickup->modelId = modelid;
+	pickup->type = type;
+	pickup->position = Eigen::Vector3f(x, y, z);
+	Utility::addToContainer(pickup->worlds, worldid);
+	Utility::addToContainer(pickup->interiors, interiorid);
+	Utility::addToContainer(pickup->players, playerid);
+	pickup->comparableStreamDistance = streamdistance < STREAMER_STATIC_DISTANCE_CUTOFF ? streamdistance : streamdistance * streamdistance;
+	pickup->streamDistance = streamdistance;
+	Utility::addToContainer(pickup->areas, areaid);
+	pickup->priority = priority;
 	core->getGrid()->addPickup(pickup);
 	core->getData()->pickups.insert(std::make_pair(pickupId, pickup));
-	return static_cast<cell>(pickupId);
+
+	int ret = pickupId;
+	API_RETURN(int ret);
 }
 
-cell AMX_NATIVE_CALL Natives::DestroyDynamicPickup(AMX *amx, cell *params)
+OMPNODE_API(StreamerPickup, Destroy, int pickupid)
 {
-	CHECK_PARAMS(1);
-	std::unordered_map<int, Item::SharedPickup>::iterator p = core->getData()->pickups.find(static_cast<int>(params[1]));
+	bool ret = false;
+	std::unordered_map<int, Item::SharedPickup>::iterator p = core->getData()->pickups.find(pickupid);
 	if (p != core->getData()->pickups.end())
 	{
 		Utility::destroyPickup(p);
-		return 1;
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret);
 }
 
-cell AMX_NATIVE_CALL Natives::IsValidDynamicPickup(AMX *amx, cell *params)
+OMPNODE_API(StreamerPickup, IsValid, int pickupid)
 {
-	CHECK_PARAMS(1);
-	std::unordered_map<int, Item::SharedPickup>::iterator p = core->getData()->pickups.find(static_cast<int>(params[1]));
+	bool ret = false;
+	std::unordered_map<int, Item::SharedPickup>::iterator p = core->getData()->pickups.find(pickupid);
 	if (p != core->getData()->pickups.end())
 	{
-		return 1;
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret);
 }
