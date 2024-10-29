@@ -63,14 +63,15 @@ check_type_size("void*" SIZEOF_VOID_P BUILTIN_TYPES_ONLY)
 
 if(NOT WIN32)
 	if(NOT TARGET_ARCH OR TARGET_ARCH STREQUAL "x86")
-		set(CMAKE_C_FLAGS "-m32 ${CMAKE_C_FLAGS}")
-		set(CMAKE_CXX_FLAGS "-m32 ${CMAKE_CXX_FLAGS}")
+		set(CMAKE_C_FLAGS " -m32 ${CMAKE_C_FLAGS}")
+		set(CMAKE_CXX_FLAGS " -m32 ${CMAKE_CXX_FLAGS}")
 	endif()
+
+	set(CMAKE_C_FLAGS " -fPIC -fpermissive ${CMAKE_C_FLAGS}")
+	set(CMAKE_CXX_FLAGS " -fPIC -fpermissive ${CMAKE_CXX_FLAGS}")
 endif()
 
-message("YO? ${TARGET_ARCH}")
 if(TARGET_ARCH STREQUAL "x64")
-	
 	add_subdirectory(lib/omp-node)
 endif()
 

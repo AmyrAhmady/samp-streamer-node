@@ -285,7 +285,7 @@ class OmpStreamerComponent final : public IComponent, public CoreEventHandler, p
 			omp_core->logLn(
 				LogLevel::Error,
 				"Error loading component %.*s: Pawn component not loaded",
-				name.length(),
+				int(name.length()),
 				name.data()
 			);
 			return;
