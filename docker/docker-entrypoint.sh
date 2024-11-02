@@ -2,7 +2,7 @@
 [ -z $CONFIG ] && config=Release || config="$CONFIG"
 
 cmake \
-    -DTARGET_ARCH=x64 \
+    -DTARGET_BUILD_ARCH=x64 \
     -S . \
     -B build \
     -G Ninja \

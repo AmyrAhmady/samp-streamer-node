@@ -6,10 +6,7 @@ set(PLUGIN_SOURCES ${SAMPSDK_DIR}/amxplugin.cpp)
 add_subdirectory(manipulation)
 add_subdirectory(pawnapi)
 add_subdirectory(utility)
-
-if(TARGET_ARCH STREQUAL "x64")
-	add_subdirectory(jsapi)
-endif()
+add_subdirectory(jsapi)
 
 list(APPEND PLUGIN_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/cell.cpp
@@ -83,8 +80,5 @@ add_definitions(
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 target_link_libraries(${PROJECT_NAME} OMP-SDK omp-gdk OMP-Network)
 
-if(TARGET_ARCH STREQUAL "x64")
-	target_link_libraries(${PROJECT_NAME} omp-node-sdk)
-endif()
-
+target_link_libraries(${PROJECT_NAME} omp-node-sdk)
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
