@@ -16,6 +16,7 @@
 
 #include "main.h"
 
+#include "omp-node.hpp"
 #include "streamer.h"
 #include "core.h"
 
@@ -414,6 +415,7 @@ void Streamer::executeCallbacks()
 				for (std::set<AMX*>::iterator i = core->getData()->interfaces.begin(); i != core->getData()->interfaces.end(); ++i)
 				{
 					int amxIndex = 0;
+					OMPNODE_CallEvent("onPlayerLeaveDynamicArea", OmpNodeEventBadRet::None, std::get<1>(c->second), std::get<0>(c->second));
 					if (!amx_FindPublic(*i, "OnPlayerLeaveDynamicArea", &amxIndex))
 					{
 						amx_Push(*i, static_cast<cell>(std::get<0>(c->second)));
@@ -436,6 +438,7 @@ void Streamer::executeCallbacks()
 				for (std::set<AMX*>::iterator i = core->getData()->interfaces.begin(); i != core->getData()->interfaces.end(); ++i)
 				{
 					int amxIndex = 0;
+					OMPNODE_CallEvent("onPlayerEnterDynamicArea", OmpNodeEventBadRet::None, std::get<1>(c->second), std::get<0>(c->second));
 					if (!amx_FindPublic(*i, "OnPlayerEnterDynamicArea", &amxIndex))
 					{
 						amx_Push(*i, static_cast<cell>(std::get<0>(c->second)));

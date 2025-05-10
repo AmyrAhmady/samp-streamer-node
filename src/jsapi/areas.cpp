@@ -16,9 +16,59 @@
 
 #include "../main.h"
 
-#include "../natives.h"
+#include "omp-node.hpp"
 #include "../core.h"
 #include "../utility.h"
+
+OMPNODE_API(StreamerArea, CreateSphere, float x, float y, float z, float size, int worldid, int interiorid, int playerid, int priority)
+{
+	if (core->getData()->getGlobalMaxItems(STREAMER_TYPE_AREA) == core->getData()->areas.size())
+	{
+		return INVALID_STREAMER_ID;
+	}
+	int areaId = Item::Area::identifier.get();
+	Item::SharedArea area(new Item::Area);
+	area->amx = nullptr; // TODO must be checked if it's used anywhere
+	area->areaId = areaId;
+	area->spectateMode = true;
+	area->type = STREAMER_AREA_TYPE_SPHERE;
+	area->position = Eigen::Vector3f(x, y, z);
+	area->comparableSize = size * size;
+	area->size = size;
+	Utility::addToContainer(area->worlds, worldid);
+	Utility::addToContainer(area->interiors, interiorid);
+	Utility::addToContainer(area->players, playerid);
+	area->priority = priority;
+	core->getGrid()->addArea(area);
+	core->getData()->areas.insert(std::make_pair(areaId, area));
+
+	int ret = areaId;
+	API_RETURN(int ret);
+}
+
+OMPNODE_API(StreamerArea, Destroy, int actorid)
+{
+	bool ret = false;
+	Utility::executeFinalAreaCallbacks(actorid);
+	std::unordered_map<int, Item::SharedArea>::iterator a = core->getData()->areas.find(actorid);
+	if (a != core->getData()->areas.end())
+	{
+		Utility::destroyArea(a);
+		ret = true;
+	}
+	API_RETURN(bool ret);
+}
+
+OMPNODE_API(StreamerArea, IsValid, int actorid)
+{
+	bool ret = false;
+	std::unordered_map<int, Item::SharedArea>::iterator a = core->getData()->areas.find(actorid);
+	if (a != core->getData()->areas.end())
+	{
+		ret = true;
+	}
+	API_RETURN(bool ret);
+}
 
 /*
 cell AMX_NATIVE_CALL Natives::CreateDynamicCircle(AMX *amx, cell *params)
@@ -65,31 +115,6 @@ cell AMX_NATIVE_CALL Natives::CreateDynamicCylinder(AMX *amx, cell *params)
 	Utility::addToContainer(area->interiors, static_cast<int>(params[7]));
 	Utility::addToContainer(area->players, static_cast<int>(params[8]));
 	area->priority = static_cast<int>(params[9]);
-	core->getGrid()->addArea(area);
-	core->getData()->areas.insert(std::make_pair(areaId, area));
-	return static_cast<cell>(areaId);
-}
-
-cell AMX_NATIVE_CALL Natives::CreateDynamicSphere(AMX *amx, cell *params)
-{
-	CHECK_PARAMS(8);
-	if (core->getData()->getGlobalMaxItems(STREAMER_TYPE_AREA) == core->getData()->areas.size())
-	{
-		return INVALID_STREAMER_ID;
-	}
-	int areaId = Item::Area::identifier.get();
-	Item::SharedArea area(new Item::Area);
-	area->amx = amx;
-	area->areaId = areaId;
-	area->spectateMode = true;
-	area->type = STREAMER_AREA_TYPE_SPHERE;
-	area->position = Eigen::Vector3f(amx_ctof(params[1]), amx_ctof(params[2]), amx_ctof(params[3]));
-	area->comparableSize = amx_ctof(params[4]) * amx_ctof(params[4]);
-	area->size = amx_ctof(params[4]);
-	Utility::addToContainer(area->worlds, static_cast<int>(params[5]));
-	Utility::addToContainer(area->interiors, static_cast<int>(params[6]));
-	Utility::addToContainer(area->players, static_cast<int>(params[7]));
-	area->priority = static_cast<int>(params[8]);
 	core->getGrid()->addArea(area);
 	core->getData()->areas.insert(std::make_pair(areaId, area));
 	return static_cast<cell>(areaId);
@@ -177,30 +202,6 @@ cell AMX_NATIVE_CALL Natives::CreateDynamicPolygon(AMX *amx, cell *params)
 	core->getGrid()->addArea(area);
 	core->getData()->areas.insert(std::make_pair(areaId, area));
 	return static_cast<cell>(areaId);
-}
-
-cell AMX_NATIVE_CALL Natives::DestroyDynamicArea(AMX *amx, cell *params)
-{
-	CHECK_PARAMS(1);
-	Utility::executeFinalAreaCallbacks(static_cast<int>(params[1]));
-	std::unordered_map<int, Item::SharedArea>::iterator a = core->getData()->areas.find(static_cast<int>(params[1]));
-	if (a != core->getData()->areas.end())
-	{
-		Utility::destroyArea(a);
-		return 1;
-	}
-	return 0;
-}
-
-cell AMX_NATIVE_CALL Natives::IsValidDynamicArea(AMX *amx, cell *params)
-{
-	CHECK_PARAMS(1);
-	std::unordered_map<int, Item::SharedArea>::iterator a = core->getData()->areas.find(static_cast<int>(params[1]));
-	if (a != core->getData()->areas.end())
-	{
-		return 1;
-	}
-	return 0;
 }
 
 cell AMX_NATIVE_CALL Natives::GetDynamicAreaType(AMX *amx, cell *params)
