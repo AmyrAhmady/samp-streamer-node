@@ -2,7 +2,7 @@
 
 # Available configs: Debug, RelWithDebInfo, [Release]
 [[ -z "$CONFIG" ]] \
-&& config=Release \
+&& config=RelWithDebInfo \
 || config="$CONFIG"
 
 docker build \

@@ -1,5 +1,5 @@
 #!/bin/sh
-[ -z $CONFIG ] && config=Release || config="$CONFIG"
+[ -z $CONFIG ] && config=RelWithDebInfo || config="$CONFIG"
 
 cmake \
     -DTARGET_BUILD_ARCH=x64 \
