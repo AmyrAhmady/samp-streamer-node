@@ -22,9 +22,7 @@
 #include "Server/Components/Pickups/pickups.hpp"
 #include "Server/Components/Objects/objects.hpp"
 
-class PlayerEvents : 
-	public PlayerConnectEventHandler, public PlayerSpawnEventHandler, public PlayerShotEventHandler,
-	public Singleton<PlayerEvents>
+class PlayerConnectEvents : public PlayerConnectEventHandler, public Singleton<PlayerConnectEvents>
 {
 	void onPlayerConnect(IPlayer& player) override
 	{
@@ -40,6 +38,15 @@ class PlayerEvents :
 		}
 	}
 
+	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override
+	{
+		int playerid = player.getID();
+		core->getData()->players.erase(playerid);
+	}
+};
+
+class PlayerSpawnEvents : public PlayerSpawnEventHandler, public Singleton<PlayerSpawnEvents>
+{
 	void onPlayerSpawn(IPlayer& player) override
 	{
 		int playerid = player.getID();
@@ -49,13 +56,10 @@ class PlayerEvents :
 			p->second.requestingClass = false;
 		}
 	}
+};
 
-	void onPlayerDisconnect(IPlayer& player, PeerDisconnectReason reason) override
-	{
-		int playerid = player.getID();
-		core->getData()->players.erase(playerid);
-	}
-
+class PlayerShotEvents : public PlayerShotEventHandler, public Singleton<PlayerShotEvents>
+{
 	bool onPlayerShotPlayerObject(IPlayer& player, IPlayerObject& target, const PlayerBulletData& bulletData) override
 	{
 		int playerid = player.getID();
@@ -429,9 +433,9 @@ public:
 	{
 		if (players)
 		{
-			players->getPlayerConnectDispatcher().removeEventHandler(PlayerEvents::Get());
-			players->getPlayerSpawnDispatcher().removeEventHandler(PlayerEvents::Get());
-			players->getPlayerShotDispatcher().removeEventHandler(PlayerEvents::Get());
+			players->getPlayerConnectDispatcher().removeEventHandler(PlayerConnectEvents::Get());
+			players->getPlayerSpawnDispatcher().removeEventHandler(PlayerSpawnEvents::Get());
+			players->getPlayerShotDispatcher().removeEventHandler(PlayerShotEvents::Get());
 		}
 
 		if (actors)
@@ -464,9 +468,9 @@ public:
 	{
 		if (players)
 		{
-			players->getPlayerConnectDispatcher().addEventHandler(PlayerEvents::Get());
-			players->getPlayerSpawnDispatcher().addEventHandler(PlayerEvents::Get());
-			players->getPlayerShotDispatcher().addEventHandler(PlayerEvents::Get());
+			players->getPlayerConnectDispatcher().addEventHandler(PlayerConnectEvents::Get());
+			players->getPlayerSpawnDispatcher().addEventHandler(PlayerSpawnEvents::Get());
+			players->getPlayerShotDispatcher().addEventHandler(PlayerShotEvents::Get());
 		}
 
 		if (actors)
