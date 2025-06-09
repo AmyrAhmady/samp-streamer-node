@@ -22,6 +22,7 @@
 #include "utility.h"
 #include "omp-nethack.h"
 #include "./events.hpp"
+#include "omp-node.hpp"
 
 extern void *pAMXFunctions;
 
@@ -299,6 +300,16 @@ class OmpStreamerComponent final : public IComponent, public CoreEventHandler, p
 		omp_core->getEventDispatcher().addEventHandler(this);
 		pAMXFunctions = (void*)&pawnComponent->getAmxFunctions();
 		streamerEventHandler.addEvents();
+		
+		auto ompnodeComponent = components->queryComponent<IOmpNodeComponent>();
+		if (ompnodeComponent == nullptr) 
+		{
+			omp_core->logLn(LogLevel::Warning, "Unable to load omp-node component. JS API is not going to be available.");
+		}
+		else 
+		{
+			OmpNodeAPIManager::Instance().Initialize(ompnodeComponent);
+		}
 	}
 
 	void onReady() override 
