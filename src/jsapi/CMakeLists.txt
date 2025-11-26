@@ -5,7 +5,7 @@ list(APPEND PLUGIN_SOURCES
 	# ${CMAKE_CURRENT_SOURCE_DIR}/deprecated.cpp
 	# ${CMAKE_CURRENT_SOURCE_DIR}/extended.cpp
 	# ${CMAKE_CURRENT_SOURCE_DIR}/manipulation.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/map-icons.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/map-icons.cpp
 	# ${CMAKE_CURRENT_SOURCE_DIR}/miscellaneous.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/objects.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/pickups.cpp
