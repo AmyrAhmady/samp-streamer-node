@@ -62,7 +62,6 @@ OMPNODE_API(StreamerMapIcon, Destroy, int mapiconid)
 		Utility::destroyMapIcon(m);
 		ret = true;
 	}
-	ret = false;
 	API_RETURN(bool ret);
 }
 
