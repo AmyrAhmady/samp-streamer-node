@@ -18,7 +18,24 @@
 
 #include "../natives.h"
 #include "../core.h"
+#include <omp-node.hpp>
 
+OMPNODE_API(Streamer, Update, int playerid, int itemType)
+{
+	bool ret = false;
+	std::unordered_map<int, Player>::iterator p = core->getData()->players.find(playerid);
+	if (p != core->getData()->players.end())
+	{
+		p->second.interiorId = ompgdk::GetPlayerInterior(p->first);
+		p->second.worldId = ompgdk::GetPlayerVirtualWorld(p->first);
+		ompgdk::GetPlayerPos(p->first, &p->second.position[0], &p->second.position[1], &p->second.position[2]);
+		core->getStreamer()->startManualUpdate(p->second, itemType);
+		ret = true;
+	}
+	API_RETURN(bool ret);
+}
+
+/*
 cell AMX_NATIVE_CALL Natives::Streamer_ProcessActiveItems(AMX *amx, cell *params)
 {
 	core->getStreamer()->processActiveItems();
@@ -107,21 +124,6 @@ cell AMX_NATIVE_CALL Natives::Streamer_GetLastUpdateTime(AMX *amx, cell *params)
 	return 1;
 }
 
-cell AMX_NATIVE_CALL Natives::Streamer_Update(AMX *amx, cell *params)
-{
-	CHECK_PARAMS(2);
-	std::unordered_map<int, Player>::iterator p = core->getData()->players.find(static_cast<int>(params[1]));
-	if (p != core->getData()->players.end())
-	{
-		p->second.interiorId = ompgdk::GetPlayerInterior(p->first);
-		p->second.worldId = ompgdk::GetPlayerVirtualWorld(p->first);
-		ompgdk::GetPlayerPos(p->first, &p->second.position[0], &p->second.position[1], &p->second.position[2]);
-		core->getStreamer()->startManualUpdate(p->second, static_cast<int>(params[2]));
-		return 1;
-	}
-	return 0;
-}
-
 cell AMX_NATIVE_CALL Natives::Streamer_UpdateEx(AMX *amx, cell *params)
 {
 	CHECK_PARAMS(9);
@@ -162,3 +164,4 @@ cell AMX_NATIVE_CALL Natives::Streamer_UpdateEx(AMX *amx, cell *params)
 	}
 	return 0;
 }
+*/
