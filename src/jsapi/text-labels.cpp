@@ -97,7 +97,7 @@ OMPNODE_API(StreamerTextLabel, Update, int id, int color, JSString text)
 	std::unordered_map<int, Item::SharedTextLabel>::iterator t = core->getData()->textLabels.find(id);
 	if (t != core->getData()->textLabels.end())
 	{
-		t->second->color = static_cast<int>(color);
+		t->second->color = color;
 		t->second->text = text;
 		for (std::unordered_map<int, Player>::iterator p = core->getData()->players.begin(); p != core->getData()->players.end(); ++p)
 		{
