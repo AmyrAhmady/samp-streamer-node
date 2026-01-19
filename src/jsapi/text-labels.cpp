@@ -21,24 +21,24 @@
 #include "../core.h"
 #include "../utility.h"
 
-OMPNODE_API(StreamerTextLabel, Create, JSString text, int color, float x, float y, float z, float drawDistance, int attachedPlayer, int attachedVehicle, int testLos, int worldId, int interiorId, int playerId, float streamDistance, int areaId, int priority)
-{
+OMPNODE_API(StreamerTextLabel, Create, JSString text, int color, float x, float y, float z, float drawDistance,
+            int attachedPlayer, int attachedVehicle, int testLos, int worldId, int interiorId, int playerId,
+            float streamDistance, int areaId, int priority) {
 	if (core->getData()->getGlobalMaxItems(STREAMER_TYPE_3D_TEXT_LABEL) == core->getData()->textLabels.size())
 	{
-		int ret = INVALID_STREAMER_ID;
+		constexpr int ret = INVALID_STREAMER_ID;
 		API_RETURN(int ret);
-		return INVALID_STREAMER_ID;
 	}
 
 	int textLabelId = Item::TextLabel::identifier.get();
-	Item::SharedTextLabel textLabel(new Item::TextLabel);
+	Item::SharedTextLabel textLabel = std::make_shared<Item::TextLabel>();
 	textLabel->amx = nullptr; // TODO must be checked if it's used anywhere
 	textLabel->textLabelId = textLabelId;
 	textLabel->inverseAreaChecking = false;
 	textLabel->originalComparableStreamDistance = -1.0f;
 	textLabel->positionOffset = Eigen::Vector3f::Zero();
 	textLabel->streamCallbacks = false;
-	textLabel->text = text;
+	textLabel->text = std::move(text);
 	textLabel->color = color;
 	textLabel->position = Eigen::Vector3f(x, y, z);
 	textLabel->drawDistance = drawDistance;
@@ -64,15 +64,14 @@ OMPNODE_API(StreamerTextLabel, Create, JSString text, int color, float x, float 
 	core->getGrid()->addTextLabel(textLabel);
 	core->getData()->textLabels.insert(std::make_pair(textLabelId, textLabel));
 
-	int ret = textLabelId;
+	const int ret = textLabelId;
 	API_RETURN(int ret);
 }
 
 OMPNODE_API(StreamerTextLabel, Destroy, int id)
 {
 	bool ret = false;
-	std::unordered_map<int, Item::SharedTextLabel>::iterator t = core->getData()->textLabels.find(id);
-	if (t != core->getData()->textLabels.end())
+	if (const auto t = core->getData()->textLabels.find(id); t != core->getData()->textLabels.end())
 	{
 		Utility::destroyTextLabel(t);
 		ret = true;
@@ -83,8 +82,7 @@ OMPNODE_API(StreamerTextLabel, Destroy, int id)
 OMPNODE_API(StreamerTextLabel, IsValid, int id)
 {
 	bool ret = false;
-	std::unordered_map<int, Item::SharedTextLabel>::iterator t = core->getData()->textLabels.find(id);
-	if (t != core->getData()->textLabels.end())
+	if (const auto t = core->getData()->textLabels.find(id); t != core->getData()->textLabels.end())
 	{
 		ret = true;
 	}
@@ -94,21 +92,20 @@ OMPNODE_API(StreamerTextLabel, IsValid, int id)
 OMPNODE_API(StreamerTextLabel, Update, int id, int color, JSString text)
 {
 	bool ret = false;
-	std::unordered_map<int, Item::SharedTextLabel>::iterator t = core->getData()->textLabels.find(id);
-	if (t != core->getData()->textLabels.end())
+	if (const auto t = core->getData()->textLabels.find(id); t != core->getData()->textLabels.end())
 	{
 		t->second->color = color;
-		t->second->text = text;
-		for (std::unordered_map<int, Player>::iterator p = core->getData()->players.begin(); p != core->getData()->players.end(); ++p)
+		t->second->text = std::move(text);
+
+		for (auto &[playerId, player] : core->getData()->players)
 		{
-			std::unordered_map<int, int>::iterator i = p->second.internalTextLabels.find(t->first);
-			if (i != p->second.internalTextLabels.end())
+			if (auto i = player.internalTextLabels.find(t->first); i != player.internalTextLabels.end())
 			{
-				ompgdk::UpdatePlayer3DTextLabelText(p->first, i->second, t->second->color, t->second->text.c_str());
+				ompgdk::UpdatePlayer3DTextLabelText(playerId, i->second, t->second->color, t->second->text.c_str());
 			}
 		}
 		ret = true;
-	};
+	}
 	API_RETURN(bool ret);
 }
 
