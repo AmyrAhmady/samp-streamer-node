@@ -29,8 +29,7 @@ OMPNODE_API(StreamerSettings, ToggleStreamCallbacks, int type, int id, int toggl
 	{
 		case STREAMER_TYPE_OBJECT:
 		{
-			std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(id);
-			if (o != core->getData()->objects.end())
+			if (const auto o = core->getData()->objects.find(id); o != core->getData()->objects.end())
 			{
 				o->second->streamCallbacks = toggle != 0;
 				ret = true;
@@ -39,8 +38,7 @@ OMPNODE_API(StreamerSettings, ToggleStreamCallbacks, int type, int id, int toggl
 		}
 		case STREAMER_TYPE_PICKUP:
 		{
-			std::unordered_map<int, Item::SharedPickup>::iterator p = core->getData()->pickups.find(id);
-			if (p != core->getData()->pickups.end())
+			if (const auto p = core->getData()->pickups.find(id); p != core->getData()->pickups.end())
 			{
 				p->second->streamCallbacks = toggle != 0;
 				ret = true;
@@ -49,8 +47,7 @@ OMPNODE_API(StreamerSettings, ToggleStreamCallbacks, int type, int id, int toggl
 		}
 		case STREAMER_TYPE_CP:
 		{
-			std::unordered_map<int, Item::SharedCheckpoint>::iterator c = core->getData()->checkpoints.find(id);
-			if (c != core->getData()->checkpoints.end())
+			if (const auto c = core->getData()->checkpoints.find(id); c != core->getData()->checkpoints.end())
 			{
 				c->second->streamCallbacks = toggle != 0;
 				ret = true;
@@ -59,8 +56,7 @@ OMPNODE_API(StreamerSettings, ToggleStreamCallbacks, int type, int id, int toggl
 		}
 		case STREAMER_TYPE_RACE_CP:
 		{
-			std::unordered_map<int, Item::SharedRaceCheckpoint>::iterator r = core->getData()->raceCheckpoints.find(id);
-			if (r != core->getData()->raceCheckpoints.end())
+			if (const auto r = core->getData()->raceCheckpoints.find(id); r != core->getData()->raceCheckpoints.end())
 			{
 				r->second->streamCallbacks = toggle != 0;
 				ret = true;
@@ -69,8 +65,7 @@ OMPNODE_API(StreamerSettings, ToggleStreamCallbacks, int type, int id, int toggl
 		}
 		case STREAMER_TYPE_MAP_ICON:
 		{
-			std::unordered_map<int, Item::SharedMapIcon>::iterator m = core->getData()->mapIcons.find(id);
-			if (m != core->getData()->mapIcons.end())
+			if (const auto m = core->getData()->mapIcons.find(id); m != core->getData()->mapIcons.end())
 			{
 				m->second->streamCallbacks = toggle != 0;
 				ret = true;
@@ -79,8 +74,7 @@ OMPNODE_API(StreamerSettings, ToggleStreamCallbacks, int type, int id, int toggl
 		}
 		case STREAMER_TYPE_3D_TEXT_LABEL:
 		{
-			std::unordered_map<int, Item::SharedTextLabel>::iterator t = core->getData()->textLabels.find(id);
-			if (t != core->getData()->textLabels.end())
+			if (const auto t = core->getData()->textLabels.find(id); t != core->getData()->textLabels.end())
 			{
 				t->second->streamCallbacks = toggle != 0;
 				ret = true;
