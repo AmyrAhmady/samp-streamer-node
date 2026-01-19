@@ -96,7 +96,7 @@ OMPNODE_API(StreamerSettings, ToggleStreamCallbacks, int type, int id, int toggl
 	API_RETURN(bool ret);
 }
 
-/*cell AMX_NATIVE_CALL Natives::Streamer_GetTickRate(AMX* amx, cell* params)
+/*cell AMX_NATIVE_CALL Natives::Streamer_GetTickRate(AMX *amx, cell *params)
 {
 	return static_cast<cell>(core->getStreamer()->getTickRate());
 }
