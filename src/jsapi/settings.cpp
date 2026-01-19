@@ -696,7 +696,7 @@ cell AMX_NATIVE_CALL Natives::Streamer_IsToggleItemInvAreas(AMX *amx, cell *para
 	return 0;
 }
 
-cell AMX_NATIVE_CALL Natives::Streamer_ToggleItemCallbacks(AMX* amx, cell* params)
+cell AMX_NATIVE_CALL Natives::Streamer_ToggleItemCallbacks(AMX *amx, cell *params)
 {
 	CHECK_PARAMS(3);
 	switch (static_cast<int>(params[1]))
