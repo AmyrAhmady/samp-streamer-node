@@ -529,6 +529,8 @@ void Streamer::executeCallbacks()
 			}
 			for (std::set<AMX*>::iterator i = core->getData()->interfaces.begin(); i != core->getData()->interfaces.end(); ++i)
 			{
+				OMPNODE_CallEvent("onItemStreamIn", OmpNodeEventBadRet::None, static_cast<cell>(std::get<0>(*c)), static_cast<cell>(std::get<1>(*c)), static_cast<cell>(std::get<2>(*c)));
+
 				int amxIndex = 0;
 				if (!amx_FindPublic(*i, "Streamer_OnItemStreamIn", &amxIndex))
 				{
@@ -599,6 +601,8 @@ void Streamer::executeCallbacks()
 			}
 			for (std::set<AMX*>::iterator i = core->getData()->interfaces.begin(); i != core->getData()->interfaces.end(); ++i)
 			{
+				OMPNODE_CallEvent("onItemStreamOut", OmpNodeEventBadRet::None, static_cast<cell>(std::get<0>(*c)), static_cast<cell>(std::get<1>(*c)), static_cast<cell>(std::get<2>(*c)));
+
 				int amxIndex = 0;
 				if (!amx_FindPublic(*i, "Streamer_OnItemStreamOut", &amxIndex))
 				{

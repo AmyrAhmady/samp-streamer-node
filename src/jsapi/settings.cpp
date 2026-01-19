@@ -16,11 +16,87 @@
 
 #include "../main.h"
 
+#include "omp-node.hpp"
 #include "../natives.h"
 #include "../core.h"
 #include "../utility.h"
 
-cell AMX_NATIVE_CALL Natives::Streamer_GetTickRate(AMX *amx, cell *params)
+OMPNODE_API(StreamerSettings, ToggleStreamCallbacks, int type, int id, int toggle)
+{
+	bool ret = false;
+
+	switch (type)
+	{
+		case STREAMER_TYPE_OBJECT:
+		{
+			std::unordered_map<int, Item::SharedObject>::iterator o = core->getData()->objects.find(id);
+			if (o != core->getData()->objects.end())
+			{
+				o->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_PICKUP:
+		{
+			std::unordered_map<int, Item::SharedPickup>::iterator p = core->getData()->pickups.find(id);
+			if (p != core->getData()->pickups.end())
+			{
+				p->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_CP:
+		{
+			std::unordered_map<int, Item::SharedCheckpoint>::iterator c = core->getData()->checkpoints.find(id);
+			if (c != core->getData()->checkpoints.end())
+			{
+				c->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_RACE_CP:
+		{
+			std::unordered_map<int, Item::SharedRaceCheckpoint>::iterator r = core->getData()->raceCheckpoints.find(id);
+			if (r != core->getData()->raceCheckpoints.end())
+			{
+				r->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_MAP_ICON:
+		{
+			std::unordered_map<int, Item::SharedMapIcon>::iterator m = core->getData()->mapIcons.find(id);
+			if (m != core->getData()->mapIcons.end())
+			{
+				m->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_3D_TEXT_LABEL:
+		{
+			std::unordered_map<int, Item::SharedTextLabel>::iterator t = core->getData()->textLabels.find(id);
+			if (t != core->getData()->textLabels.end())
+			{
+				t->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		default:
+		{
+			Utility::logError("Streamer_ToggleItemCallbacks: Invalid type specified.");
+		}
+	}
+
+	API_RETURN(bool ret);
+}
+
+/*cell AMX_NATIVE_CALL Natives::Streamer_GetTickRate(AMX* amx, cell* params)
 {
 	return static_cast<cell>(core->getStreamer()->getTickRate());
 }
@@ -620,7 +696,7 @@ cell AMX_NATIVE_CALL Natives::Streamer_IsToggleItemInvAreas(AMX *amx, cell *para
 	return 0;
 }
 
-cell AMX_NATIVE_CALL Natives::Streamer_ToggleItemCallbacks(AMX *amx, cell *params)
+cell AMX_NATIVE_CALL Natives::Streamer_ToggleItemCallbacks(AMX* amx, cell* params)
 {
 	CHECK_PARAMS(3);
 	switch (static_cast<int>(params[1]))
@@ -792,4 +868,4 @@ cell AMX_NATIVE_CALL Natives::Streamer_AmxUnloadDestroyItems(AMX *amx, cell *par
 	}
 	core->getData()->amxUnloadDestroyItems.erase(amx);
 	return 1;
-}
+}*/
