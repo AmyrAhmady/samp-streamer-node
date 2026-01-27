@@ -16,77 +16,100 @@
 
 #include "../main.h"
 
+#include "omp-node.hpp"
 #include "../natives.h"
 #include "../core.h"
 #include "../utility.h"
 
-/*
-cell AMX_NATIVE_CALL Natives::CreateDynamic3DTextLabel(AMX *amx, cell *params)
-{
-	CHECK_PARAMS(15);
+OMPNODE_API(StreamerTextLabel, Create, JSString text, int color, float x, float y, float z, float drawDistance,
+            int attachedPlayer, int attachedVehicle, int testLos, int worldId, int interiorId, int playerId,
+            float streamDistance, int areaId, int priority) {
 	if (core->getData()->getGlobalMaxItems(STREAMER_TYPE_3D_TEXT_LABEL) == core->getData()->textLabels.size())
 	{
-		return INVALID_STREAMER_ID;
+		constexpr int ret = INVALID_STREAMER_ID;
+		API_RETURN(int ret);
 	}
+
 	int textLabelId = Item::TextLabel::identifier.get();
-	Item::SharedTextLabel textLabel(new Item::TextLabel);
-	textLabel->amx = amx;
+	Item::SharedTextLabel textLabel = std::make_shared<Item::TextLabel>();
+	textLabel->amx = nullptr; // TODO must be checked if it's used anywhere
 	textLabel->textLabelId = textLabelId;
 	textLabel->inverseAreaChecking = false;
 	textLabel->originalComparableStreamDistance = -1.0f;
 	textLabel->positionOffset = Eigen::Vector3f::Zero();
 	textLabel->streamCallbacks = false;
-	textLabel->text = Utility::convertNativeStringToString(amx, params[1]);
-	textLabel->color = static_cast<int>(params[2]);
-	textLabel->position = Eigen::Vector3f(amx_ctof(params[3]), amx_ctof(params[4]), amx_ctof(params[5]));
-	textLabel->drawDistance = amx_ctof(params[6]);
-	if (static_cast<int>(params[7]) != INVALID_PLAYER_ID || static_cast<int>(params[8]) != INVALID_VEHICLE_ID)
+	textLabel->text = std::move(text);
+	textLabel->color = color;
+	textLabel->position = Eigen::Vector3f(x, y, z);
+	textLabel->drawDistance = drawDistance;
+	if (attachedPlayer != INVALID_PLAYER_ID || attachedVehicle != INVALID_VEHICLE_ID)
 	{
 		textLabel->attach = std::make_shared<Item::TextLabel::Attach>();
-		textLabel->attach->player = static_cast<int>(params[7]);
-		textLabel->attach->vehicle = static_cast<int>(params[8]);
+		textLabel->attach->player = attachedPlayer;
+		textLabel->attach->vehicle = attachedVehicle;
 		if (textLabel->position.cwiseAbs().maxCoeff() > 50.0f)
 		{
 			textLabel->position.setZero();
 		}
 		core->getStreamer()->attachedTextLabels.insert(textLabel);
 	}
-	textLabel->testLOS = static_cast<int>(params[9]) != 0;
-	Utility::addToContainer(textLabel->worlds, static_cast<int>(params[10]));
-	Utility::addToContainer(textLabel->interiors, static_cast<int>(params[11]));
-	Utility::addToContainer(textLabel->players, static_cast<int>(params[12]));
-	textLabel->comparableStreamDistance = amx_ctof(params[13]) < STREAMER_STATIC_DISTANCE_CUTOFF ? amx_ctof(params[13]) : amx_ctof(params[13]) * amx_ctof(params[13]);
-	textLabel->streamDistance = amx_ctof(params[13]);
-	Utility::addToContainer(textLabel->areas, static_cast<int>(params[14]));
-	textLabel->priority = static_cast<int>(params[15]);
+	textLabel->testLOS = testLos != 0;
+	Utility::addToContainer(textLabel->worlds, worldId);
+	Utility::addToContainer(textLabel->interiors, interiorId);
+	Utility::addToContainer(textLabel->players, playerId);
+	textLabel->comparableStreamDistance = streamDistance < STREAMER_STATIC_DISTANCE_CUTOFF ? streamDistance : streamDistance * streamDistance;
+	textLabel->streamDistance = streamDistance;
+	Utility::addToContainer(textLabel->areas, areaId);
+	textLabel->priority = priority;
 	core->getGrid()->addTextLabel(textLabel);
 	core->getData()->textLabels.insert(std::make_pair(textLabelId, textLabel));
-	return static_cast<cell>(textLabelId);
+
+	const int ret = textLabelId;
+	API_RETURN(int ret);
 }
 
-cell AMX_NATIVE_CALL Natives::DestroyDynamic3DTextLabel(AMX *amx, cell *params)
+OMPNODE_API(StreamerTextLabel, Destroy, int id)
 {
-	CHECK_PARAMS(1);
-	std::unordered_map<int, Item::SharedTextLabel>::iterator t = core->getData()->textLabels.find(static_cast<int>(params[1]));
-	if (t != core->getData()->textLabels.end())
+	bool ret = false;
+	if (const auto t = core->getData()->textLabels.find(id); t != core->getData()->textLabels.end())
 	{
 		Utility::destroyTextLabel(t);
-		return 1;
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret);
 }
 
-cell AMX_NATIVE_CALL Natives::IsValidDynamic3DTextLabel(AMX *amx, cell *params)
+OMPNODE_API(StreamerTextLabel, IsValid, int id)
 {
-	CHECK_PARAMS(1);
-	std::unordered_map<int, Item::SharedTextLabel>::iterator t = core->getData()->textLabels.find(static_cast<int>(params[1]));
-	if (t != core->getData()->textLabels.end())
+	bool ret = false;
+	if (const auto t = core->getData()->textLabels.find(id); t != core->getData()->textLabels.end())
 	{
-		return 1;
+		ret = true;
 	}
-	return 0;
+	API_RETURN(bool ret);
 }
 
+OMPNODE_API(StreamerTextLabel, Update, int id, int color, JSString text)
+{
+	bool ret = false;
+	if (const auto t = core->getData()->textLabels.find(id); t != core->getData()->textLabels.end())
+	{
+		t->second->color = color;
+		t->second->text = std::move(text);
+
+		for (auto &[playerId, player] : core->getData()->players)
+		{
+			if (auto i = player.internalTextLabels.find(t->first); i != player.internalTextLabels.end())
+			{
+				ompgdk::UpdatePlayer3DTextLabelText(playerId, i->second, t->second->color, t->second->text.c_str());
+			}
+		}
+		ret = true;
+	}
+	API_RETURN(bool ret);
+}
+
+/*
 cell AMX_NATIVE_CALL Natives::GetDynamic3DTextLabelText(AMX *amx, cell *params)
 {
 	CHECK_PARAMS(3);

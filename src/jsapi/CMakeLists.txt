@@ -10,7 +10,7 @@ list(APPEND PLUGIN_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/objects.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/pickups.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/race-checkpoints.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/settings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/settings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/text-labels.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/updates.cpp
 )

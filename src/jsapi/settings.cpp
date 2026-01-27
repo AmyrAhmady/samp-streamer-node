@@ -16,11 +16,81 @@
 
 #include "../main.h"
 
+#include "omp-node.hpp"
 #include "../natives.h"
 #include "../core.h"
 #include "../utility.h"
 
-cell AMX_NATIVE_CALL Natives::Streamer_GetTickRate(AMX *amx, cell *params)
+OMPNODE_API(StreamerSettings, ToggleStreamCallbacks, int type, int id, int toggle)
+{
+	bool ret = false;
+
+	switch (type)
+	{
+		case STREAMER_TYPE_OBJECT:
+		{
+			if (const auto o = core->getData()->objects.find(id); o != core->getData()->objects.end())
+			{
+				o->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_PICKUP:
+		{
+			if (const auto p = core->getData()->pickups.find(id); p != core->getData()->pickups.end())
+			{
+				p->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_CP:
+		{
+			if (const auto c = core->getData()->checkpoints.find(id); c != core->getData()->checkpoints.end())
+			{
+				c->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_RACE_CP:
+		{
+			if (const auto r = core->getData()->raceCheckpoints.find(id); r != core->getData()->raceCheckpoints.end())
+			{
+				r->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_MAP_ICON:
+		{
+			if (const auto m = core->getData()->mapIcons.find(id); m != core->getData()->mapIcons.end())
+			{
+				m->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		case STREAMER_TYPE_3D_TEXT_LABEL:
+		{
+			if (const auto t = core->getData()->textLabels.find(id); t != core->getData()->textLabels.end())
+			{
+				t->second->streamCallbacks = toggle != 0;
+				ret = true;
+			}
+			break;
+		}
+		default:
+		{
+			Utility::logError("Streamer_ToggleItemCallbacks: Invalid type specified.");
+		}
+	}
+
+	API_RETURN(bool ret);
+}
+
+/*cell AMX_NATIVE_CALL Natives::Streamer_GetTickRate(AMX *amx, cell *params)
 {
 	return static_cast<cell>(core->getStreamer()->getTickRate());
 }
@@ -792,4 +862,4 @@ cell AMX_NATIVE_CALL Natives::Streamer_AmxUnloadDestroyItems(AMX *amx, cell *par
 	}
 	core->getData()->amxUnloadDestroyItems.erase(amx);
 	return 1;
-}
+}*/
